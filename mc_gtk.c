@@ -1,3 +1,7 @@
+/* 
+   Tim Davis
+   2 pane file manager in C, with Gtk
+*/
 /*  needed for lstat  */
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
