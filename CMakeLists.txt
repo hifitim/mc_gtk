@@ -1,6 +1,6 @@
 # Set the name and the supported language of the project
-project(MC_GUI)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/home/tim/ClionProjects/MC_GUI")
+project(mc_gtk)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "/home/tim/git/mc_gtk")
 # Set the minimum version of cmake required to build this project
 cmake_minimum_required(VERSION 3.3)
 # Use the package PkgConfig to detect GTK+ headers/library files
@@ -13,9 +13,9 @@ link_directories(${GTK3_LIBRARY_DIRS})
 # Add other flags to the compiler
 add_definitions(${GTK3_CFLAGS_OTHER})
 # Add an executable compiled from hello.c
-add_executable(mc_gui mc_gui.c mc_gui.h util.c util.h)
+add_executable(mc_gtk mc_gui.c mc_gui.h util.c util.h)
 # Link the target to the GTK+ libraries
-target_link_libraries(mc_gui ${GTK3_LIBRARIES})
+target_link_libraries(mc_gtk ${GTK3_LIBRARIES})
 
 #set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Werror")
 

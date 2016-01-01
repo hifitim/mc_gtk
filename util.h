@@ -15,6 +15,4 @@
 int is_directory(const char *path);
 int is_executable(const char *path);
 
-
-
 #endif //MC_GUI_UTIL_H

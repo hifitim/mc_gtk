@@ -2,8 +2,8 @@
 // Created by tim on 12/5/15.
 //
 
-#ifndef MC_GUI_MC_GUI_H
-#define MC_GUI_MC_GUI_H
+#ifndef MC_GUI_H
+#define MC_GUI_H
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
@@ -99,4 +99,4 @@ static void
                                gpointer user_data);
 
 
-#endif //MC_GUI_MC_GUI_H
+#endif //MC_GUI_H
