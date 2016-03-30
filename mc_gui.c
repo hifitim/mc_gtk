@@ -214,10 +214,10 @@ open_file(GtkTreeView *treeview,
     GtkTreeIter iter;
     struct app_side *side = (struct app_side*)user_data;
     GtkEntry *entry = GTK_ENTRY(side->entry);
-    unsigned long current_location_len = strlen(side->current_location);
-    char *current_location = calloc(current_location_len + 1, sizeof(char));
-    snprintf(current_location, current_location_len + 1, "%s", side->current_location);
-
+    size_t current_location_len = strlen(side->current_location) + 1;
+    char *current_location = malloc(current_location_len);
+    strcpy(current_location, side->current_location);
+    g_printf("current_location: %s\n", current_location);
     model = gtk_tree_view_get_model(treeview);
     char *file_path = NULL;
     if (gtk_tree_model_get_iter(model, &iter, path))
@@ -226,31 +226,34 @@ open_file(GtkTreeView *treeview,
         gtk_tree_model_get(model, &iter, FILE_NAME_COLUMN, &name, -1);
         if(strcmp(name, "..") != 0)
         {
-            unsigned long name_len = strlen(name);
+            g_printf("name: %s\n", name);
+            size_t name_len = strlen(name);
             g_printf("name_len: %lu\n", name_len);
             /*  no need to add an extra '/' if that's all that's in the current_location   */
             if(strcmp(current_location, "/")) {
-                file_path = calloc(current_location_len + name_len + 2, sizeof(char));
+                file_path = malloc(current_location_len + name_len + 2);
                 snprintf(file_path, current_location_len + name_len + 2, "%s/%s", current_location, name);
             }
             else {
-                file_path = calloc(name_len + 2, sizeof(char));
+                file_path = malloc(name_len + 2);
                 snprintf(file_path, name_len + 2, "/%s", name);
             }
-            unsigned long file_path_len = strlen(file_path);
+            size_t file_path_len = strlen(file_path);
             g_printf("file_path: %s\n", file_path);
             g_printf("file_path_len: %lu\n", file_path_len);
             if(is_directory(file_path))
             {
                 gtk_entry_set_text(GTK_ENTRY(entry), file_path);
-                snprintf(side->current_location, DEFAULT_STRING_LEN, "%s", file_path);
+                strcpy(side->current_location, file_path);
+                g_printf("file_path: %s\n", file_path);
+                /*snprintf(side->current_location, DEFAULT_STRING_LEN, "%s", file_path);*/
                 populate_list_store_from_folder(side, file_path);
             }
             g_free(name);
         }
         else
         {
-            file_path = calloc(strlen(gtk_entry_get_text(entry)) + 1, sizeof(char));
+            file_path = malloc(strlen(gtk_entry_get_text(entry)) + 1);
             strcpy(file_path, gtk_entry_get_text(entry));
             size_t path_len = strlen(file_path);
             size_t final_len = 0;
@@ -267,9 +270,11 @@ open_file(GtkTreeView *treeview,
             final_len = (final_len == 0) ? 1 : final_len;
             char *new_path = calloc(final_len + 1, sizeof(char));
             strncpy(new_path, file_path, final_len);
+            g_printf("new_path: %s\n", new_path);
             gtk_entry_set_text(GTK_ENTRY(entry), new_path);
             populate_list_store_from_folder(side, new_path);
-            snprintf(side->current_location, DEFAULT_STRING_LEN, "%s", new_path);
+            strcpy(side->current_location, new_path);
+            free(new_path);
         }
 
         free(file_path);
