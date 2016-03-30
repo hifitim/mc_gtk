@@ -214,8 +214,8 @@ open_file(GtkTreeView *treeview,
     GtkTreeIter iter;
     struct app_side *side = (struct app_side*)user_data;
     GtkEntry *entry = GTK_ENTRY(side->entry);
-    char current_location[DEFAULT_STRING_LEN];
     unsigned long current_location_len = strlen(side->current_location);
+    char *current_location = calloc(current_location_len + 1, sizeof(char));
     snprintf(current_location, current_location_len + 1, "%s", side->current_location);
 
     model = gtk_tree_view_get_model(treeview);
@@ -274,6 +274,7 @@ open_file(GtkTreeView *treeview,
 
         free(file_path);
     }
+    free(current_location);
 }
 
 static void
