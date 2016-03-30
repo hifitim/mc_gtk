@@ -7,6 +7,8 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
+#include <glib.h>
+#include <glib/gprintf.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -48,7 +50,9 @@ struct app_state
     char **files_to_move;
     unsigned int num_files_to_move;
     enum FILE_MOVE_MODE move_mode;
-} current_state;
+};
+
+struct app_state current_state;
 
 /*  function declarations   */
 static void

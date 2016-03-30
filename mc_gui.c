@@ -26,7 +26,7 @@ tree_right_click_cut(GtkWidget *menuitem, gpointer user_data)
     model = gtk_tree_view_get_model(side->tree_view);
     selected_list = gtk_tree_selection_get_selected_rows(selection, &model);
 
-    puts("Cut.");
+    g_printf("Cut.\n");
 
     GList *l_temp;
     current_state.files_to_move = malloc(sizeof(char*));
@@ -38,7 +38,7 @@ tree_right_click_cut(GtkWidget *menuitem, gpointer user_data)
         gtk_tree_model_get_value(model, &iter, FILE_NAME_COLUMN, &name);
         current_state.files_to_move[num_files_to_copy-1] = malloc(sizeof(char*)*strlen(g_value_get_string(&name)));
         snprintf(current_state.files_to_move[num_files_to_copy-1], DEFAULT_STRING_LEN, "%s", g_value_get_string(&name));
-        puts(current_state.files_to_move[num_files_to_copy-1]);
+        g_printf("%s\n", current_state.files_to_move[num_files_to_copy-1]);
     }
     current_state.num_files_to_move = num_files_to_copy;
     current_state.paste_active = 1;
@@ -80,7 +80,7 @@ tree_right_click_copy(GtkWidget *menuitem, gpointer user_data)
         gtk_tree_model_get_value(model, &iter, FILE_NAME_COLUMN, &name);
         current_state.files_to_move[num_files_to_copy-1] = malloc(sizeof(char*)*strlen(g_value_get_string(&name)));
         snprintf(current_state.files_to_move[num_files_to_copy-1], DEFAULT_STRING_LEN, "%s", g_value_get_string(&name));
-        puts(current_state.files_to_move[num_files_to_copy-1]);
+        g_printf("%s\n", current_state.files_to_move[num_files_to_copy-1]);
     }
     current_state.paste_active = 1;
     current_state.move_mode = COPY_MODE;
@@ -99,7 +99,7 @@ tree_right_click_paste(GtkWidget *menuitem, gpointer user_data)
     model = gtk_tree_view_get_model(side->tree_view);
     selected_list = gtk_tree_selection_get_selected_rows(selection, &model);
 
-    puts("Paste.");
+    g_printf("Paste.\n");
 
     GList *l_temp;
     for (l_temp = selected_list; l_temp != NULL; l_temp = l_temp->next)
@@ -108,7 +108,7 @@ tree_right_click_paste(GtkWidget *menuitem, gpointer user_data)
         // do something with l->data
         gtk_tree_model_get_iter(model, &iter, l_temp->data);
         gtk_tree_model_get_value(model, &iter, FILE_NAME_COLUMN, &name);
-        puts((char*) g_value_get_string(&name));
+        g_printf("%s\n",(char*) g_value_get_string(&name));
     }
 }
 
@@ -139,7 +139,7 @@ location_entry_keypress(GtkWidget *widget,
         {
             gtk_entry_set_text(side->entry, side->current_location);
             populate_list_store_from_folder(side, side->current_location);
-            puts("Text entry error: not a directory!");
+            g_printf("Text entry error: not a directory!\n");
             /*  Move the cursor to the end of the entry to make it easy to retype, since you made a mistake   */
             gtk_editable_set_position(GTK_EDITABLE(side->entry), -1);
         }
@@ -170,7 +170,7 @@ tree_view_click(GtkWidget *treeview,
     struct app_side *side = (struct app_side*) user_data;
     if (event->type == GDK_BUTTON_PRESS  &&  event->button == 3)
     {
-        puts("Right click.");
+        g_printf("Right click.\n");
         GtkWidget *menu, *menuitem;
 
         menu = gtk_menu_new();
@@ -198,7 +198,7 @@ tree_view_click(GtkWidget *treeview,
     }
     else if(event->type == GDK_BUTTON_PRESS  &&  event->button == 1)
     {
-        puts("Left click.");
+        g_printf("Left click.\n");
     }
     return ((gboolean)FALSE);
 }
@@ -209,28 +209,37 @@ open_file(GtkTreeView *treeview,
           GtkTreeViewColumn *col,
           gpointer user_data)
 {
-    puts("Row activated.");
-    char file_path[DEFAULT_STRING_LEN];
+    g_printf("Row activated.\n");
     GtkTreeModel *model;
     GtkTreeIter iter;
     struct app_side *side = (struct app_side*)user_data;
     GtkEntry *entry = GTK_ENTRY(side->entry);
     char current_location[DEFAULT_STRING_LEN];
+    unsigned long current_location_len = strlen(side->current_location);
+    snprintf(current_location, current_location_len + 1, "%s", side->current_location);
 
-    snprintf(current_location, DEFAULT_STRING_LEN, "%s", side->current_location);
     model = gtk_tree_view_get_model(treeview);
+    char *file_path = NULL;
     if (gtk_tree_model_get_iter(model, &iter, path))
     {
         gchar *name;
         gtk_tree_model_get(model, &iter, FILE_NAME_COLUMN, &name, -1);
         if(strcmp(name, "..") != 0)
         {
+            unsigned long name_len = strlen(name);
+            g_printf("name_len: %lu\n", name_len);
             /*  no need to add an extra '/' if that's all that's in the current_location   */
-            if(strcmp(current_location, "/"))
-                snprintf(file_path, DEFAULT_STRING_LEN, "%s/%s", current_location, name);
-            else
-                snprintf(file_path, DEFAULT_STRING_LEN, "/%s", name);
-
+            if(strcmp(current_location, "/")) {
+                file_path = calloc(current_location_len + name_len + 2, sizeof(char));
+                snprintf(file_path, current_location_len + name_len + 2, "%s/%s", current_location, name);
+            }
+            else {
+                file_path = calloc(name_len + 2, sizeof(char));
+                snprintf(file_path, name_len + 2, "/%s", name);
+            }
+            unsigned long file_path_len = strlen(file_path);
+            g_printf("file_path: %s\n", file_path);
+            g_printf("file_path_len: %lu\n", file_path_len);
             if(is_directory(file_path))
             {
                 gtk_entry_set_text(GTK_ENTRY(entry), file_path);
@@ -241,11 +250,11 @@ open_file(GtkTreeView *treeview,
         }
         else
         {
-
+            file_path = calloc(strlen(gtk_entry_get_text(entry)) + 1, sizeof(char));
             strcpy(file_path, gtk_entry_get_text(entry));
             size_t path_len = strlen(file_path);
             size_t final_len = 0;
-            for(size_t k = path_len - 1; k >= 0; k--)
+            for(int k = path_len - 1; k >= 0; k--)
             {
                 if(file_path[k] == '/')
                 {
@@ -253,16 +262,17 @@ open_file(GtkTreeView *treeview,
                     break;
                 }
             }
-            char new_path[DEFAULT_STRING_LEN];
-            memset(new_path, '\0', DEFAULT_STRING_LEN);
 
             /* If we get to root, don't go further  */
             final_len = (final_len == 0) ? 1 : final_len;
+            char *new_path = calloc(final_len + 1, sizeof(char));
             strncpy(new_path, file_path, final_len);
             gtk_entry_set_text(GTK_ENTRY(entry), new_path);
             populate_list_store_from_folder(side, new_path);
             snprintf(side->current_location, DEFAULT_STRING_LEN, "%s", new_path);
         }
+
+        free(file_path);
     }
 }
 
